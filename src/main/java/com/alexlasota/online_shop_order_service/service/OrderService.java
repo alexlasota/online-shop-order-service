@@ -27,8 +27,6 @@ import java.util.ArrayList;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final OrderAttributeRepository orderAttributeRepository;
-    private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
 
 
