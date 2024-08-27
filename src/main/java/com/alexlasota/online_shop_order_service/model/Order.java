@@ -1,5 +1,6 @@
 package com.alexlasota.online_shop_order_service.model;
 
+import com.alexlasota.online_shop_order_service.invoice.Invoice;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +42,9 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderAttribute> attributes = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    private Invoice invoice;
 
     @PrePersist
     protected void onCreate() {

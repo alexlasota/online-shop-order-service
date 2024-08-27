@@ -2,6 +2,8 @@ package com.alexlasota.online_shop_order_service.controller;
 
 import com.alexlasota.online_shop_order_service.dto.OrderDTO;
 import com.alexlasota.online_shop_order_service.exception.OrderNotFoundException;
+import com.alexlasota.online_shop_order_service.mapper.OrderMapper;
+import com.alexlasota.online_shop_order_service.model.Order;
 import com.alexlasota.online_shop_order_service.model.OrderStatus;
 import com.alexlasota.online_shop_order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
     private final OrderService orderService;
+    private final OrderMapper orderMapper;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderMapper orderMapper) {
         this.orderService = orderService;
+        this.orderMapper = orderMapper;
     }
 
     @PostMapping
@@ -45,6 +49,13 @@ public class OrderController {
         OrderDTO updatedOrder = orderService.updateOrderStatus(id, newStatus);
         return ResponseEntity.ok(updatedOrder);
     }
+
+    @PostMapping("/{orderId}/process")
+    public ResponseEntity<OrderDTO> processOrder(@PathVariable Long orderId) {
+        Order processedOrder = orderService.processOrder(orderId);
+        return ResponseEntity.ok(orderMapper.toDTO(processedOrder));
+    }
+
 
     @ExceptionHandler(OrderNotFoundException.class)
     public ResponseEntity<String> handleOrderNotFoundException(OrderNotFoundException ex) {

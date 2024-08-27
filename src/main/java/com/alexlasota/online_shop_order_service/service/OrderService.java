@@ -4,13 +4,13 @@ import com.alexlasota.online_shop_order_service.dto.OrderAttributeDTO;
 import com.alexlasota.online_shop_order_service.dto.OrderDTO;
 import com.alexlasota.online_shop_order_service.dto.OrderItemDTO;
 import com.alexlasota.online_shop_order_service.exception.OrderNotFoundException;
+import com.alexlasota.online_shop_order_service.invoice.Invoice;
+import com.alexlasota.online_shop_order_service.invoice.InvoiceService;
 import com.alexlasota.online_shop_order_service.mapper.OrderMapper;
 import com.alexlasota.online_shop_order_service.model.Order;
 import com.alexlasota.online_shop_order_service.model.OrderAttribute;
 import com.alexlasota.online_shop_order_service.model.OrderItem;
 import com.alexlasota.online_shop_order_service.model.OrderStatus;
-import com.alexlasota.online_shop_order_service.repository.OrderAttributeRepository;
-import com.alexlasota.online_shop_order_service.repository.OrderItemRepository;
 import com.alexlasota.online_shop_order_service.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-
+    private final InvoiceService invoiceService;
 
     public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = orderMapper.toEntity(orderDTO);
@@ -72,5 +72,16 @@ public class OrderService {
         order.setStatus(newStatus);
         order = orderRepository.save(order);
         return orderMapper.toDTO(order);
+    }
+    public Order processOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+
+        order.setStatus(OrderStatus.PROCESSING);
+
+        Invoice invoice = invoiceService.generateInvoice(order);
+        order.setInvoice(invoice);
+
+        return orderRepository.save(order);
     }
 }
